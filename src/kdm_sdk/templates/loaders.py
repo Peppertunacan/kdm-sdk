@@ -48,6 +48,11 @@ def save_yaml(template: "Template", filepath: str):
     """
     config = template.to_dict()
 
+    # Ensure parent directory exists
+    path = Path(filepath)
+    if not path.parent.exists():
+        path.parent.mkdir(parents=True, exist_ok=True)
+
     with open(filepath, "w", encoding="utf-8") as f:
         yaml.dump(
             config, f, allow_unicode=True, default_flow_style=False, sort_keys=False
