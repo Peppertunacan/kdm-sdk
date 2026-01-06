@@ -185,17 +185,18 @@ async def correlation_analysis():
         upstream_df = to_df(upstream_result.get("data", []))
         downstream_df = to_df(downstream_result.get("data", []))
 
-        # FacilityPair 생성
+        # FacilityPair 생성 (lag_hours: 기본 시간 지연값 설정 가능)
         pair = FacilityPair(
             upstream_name="소양강댐",
             downstream_name="춘천시(천전리)",
             upstream_type="dam",
             downstream_type="water_level",
             upstream_data=upstream_df,
-            downstream_data=downstream_df
+            downstream_data=downstream_df,
+            lag_hours=6.0  # 선택: 기본 시간 지연값 (to_dataframe()에서 자동 사용)
         )
 
-        # 최적 시간차 찾기
+        # 최적 시간차 찾기 (또는 위에서 설정한 lag_hours 사용)
         correlation = pair.find_optimal_lag(max_lag_hours=12)
         print(f"최적 시간차: {correlation.lag_hours:.1f}시간")
         print(f"상관계수: {correlation.correlation:.3f}")
@@ -223,8 +224,39 @@ async def template_query():
 
     # 템플릿 저장하여 재사용
     template.save_yaml("templates/weekly_monitoring.yaml")
+    # 또는 간단히: template.save("weekly_monitoring.yaml")
 
 asyncio.run(template_query())
+```
+
+### 템플릿: 상류-하류 페어 분석
+
+```python
+from kdm_sdk.templates import TemplateBuilder
+
+async def pair_template():
+    # add_pair()로 상류-하류 페어 템플릿 생성
+    template = TemplateBuilder("소양강댐 하류 영향 분석") \
+        .add_pair(
+            upstream_name="소양강댐",
+            downstream_name="춘천시(천전리)",
+            upstream_type="dam",
+            downstream_type="water_level",
+            upstream_measurements=["방류량"],
+            downstream_measurements=["수위"],
+            lag_hours=6.0  # 시간 지연값
+        ) \
+        .days(30) \
+        .build()
+
+    # 실행 - FacilityPair 반환
+    pair = await template.execute()
+
+    # to_dataframe()에서 lag_hours 자동 적용
+    df = pair.to_dataframe()
+    print(df.head())
+
+asyncio.run(pair_template())
 ```
 
 ### 관측소 자동 탐색 (신규 기능)

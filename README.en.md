@@ -159,17 +159,18 @@ async def correlation_analysis():
         upstream_df = to_df(upstream_result.get("data", []))
         downstream_df = to_df(downstream_result.get("data", []))
 
-        # Create FacilityPair
+        # Create FacilityPair (lag_hours: set default time lag)
         pair = FacilityPair(
             upstream_name="소양강댐",
             downstream_name="춘천시(천전리)",
             upstream_type="dam",
             downstream_type="water_level",
             upstream_data=upstream_df,
-            downstream_data=downstream_df
+            downstream_data=downstream_df,
+            lag_hours=6.0  # Optional: default lag (auto-used in to_dataframe())
         )
 
-        # Find optimal lag time
+        # Find optimal lag time (or use lag_hours set above)
         correlation = pair.find_optimal_lag(max_lag_hours=12)
         print(f"Optimal lag: {correlation.lag_hours:.1f} hours")
         print(f"Correlation: {correlation.correlation:.3f}")
@@ -197,8 +198,39 @@ async def template_query():
 
     # Save template for reuse
     template.save_yaml("templates/weekly_monitoring.yaml")
+    # Or simply: template.save("weekly_monitoring.yaml")
 
 asyncio.run(template_query())
+```
+
+### Template: Upstream-Downstream Pair Analysis
+
+```python
+from kdm_sdk.templates import TemplateBuilder
+
+async def pair_template():
+    # Create upstream-downstream pair template with add_pair()
+    template = TemplateBuilder("Soyang Dam Downstream Impact Analysis") \
+        .add_pair(
+            upstream_name="소양강댐",
+            downstream_name="춘천시(천전리)",
+            upstream_type="dam",
+            downstream_type="water_level",
+            upstream_measurements=["방류량"],
+            downstream_measurements=["수위"],
+            lag_hours=6.0  # Time lag
+        ) \
+        .days(30) \
+        .build()
+
+    # Execute - returns FacilityPair
+    pair = await template.execute()
+
+    # to_dataframe() auto-applies lag_hours
+    df = pair.to_dataframe()
+    print(df.head())
+
+asyncio.run(pair_template())
 ```
 
 ### Automatic Station Discovery (New Feature)
