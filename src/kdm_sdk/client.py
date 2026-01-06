@@ -73,6 +73,10 @@ class KDMClient:
             last_error = None
 
             for attempt in range(self.max_retries):
+                # Use local variables to ensure cleanup on failure
+                sse_context = None
+                session = None
+
                 try:
                     logger.info(
                         f"[KDM Client] Connecting to: {self.server_url} "
@@ -84,19 +88,25 @@ class KDMClient:
                     base_url = f"{parsed.scheme}://{parsed.netloc}"
 
                     # Use SSE client with timeout
-                    self._sse_context = sse_client(url=self.server_url)  # type: ignore
-                    self._read_stream, self._write_stream = await asyncio.wait_for(
-                        self._sse_context.__aenter__(), timeout=CONNECTION_TIMEOUT  # type: ignore
+                    sse_context = sse_client(url=self.server_url)  # type: ignore
+                    read_stream, write_stream = await asyncio.wait_for(
+                        sse_context.__aenter__(), timeout=CONNECTION_TIMEOUT  # type: ignore
                     )
 
                     # Create session
-                    self._session = ClientSession(self._read_stream, self._write_stream)  # type: ignore
-                    await self._session.__aenter__()
+                    session = ClientSession(read_stream, write_stream)  # type: ignore
+                    await session.__aenter__()
 
                     # Initialize session with timeout
                     await asyncio.wait_for(
-                        self._session.initialize(), timeout=CONNECTION_TIMEOUT
+                        session.initialize(), timeout=CONNECTION_TIMEOUT
                     )
+
+                    # Success - assign to instance variables
+                    self._sse_context = sse_context
+                    self._read_stream = read_stream
+                    self._write_stream = write_stream
+                    self._session = session
 
                     logger.info(
                         f"[KDM Client] Connected successfully to {self.server_url}"
@@ -106,14 +116,38 @@ class KDMClient:
                 except asyncio.TimeoutError as e:
                     last_error = f"Connection timeout after {CONNECTION_TIMEOUT}s"
                     logger.warning(f"[KDM Client] {last_error}")
-                    self._session = None
+
+                    # Clean up resources on failure
+                    if session:
+                        try:
+                            await session.__aexit__(None, None, None)
+                        except Exception:
+                            pass
+                    if sse_context:
+                        try:
+                            await sse_context.__aexit__(None, None, None)
+                        except Exception:
+                            pass
+
                     if attempt < self.max_retries - 1:
                         await asyncio.sleep(1)  # Wait before retry
 
                 except Exception as e:
                     last_error = str(e)
                     logger.warning(f"[KDM Client] Connection attempt failed: {e}")
-                    self._session = None
+
+                    # Clean up resources on failure
+                    if session:
+                        try:
+                            await session.__aexit__(None, None, None)
+                        except Exception:
+                            pass
+                    if sse_context:
+                        try:
+                            await sse_context.__aexit__(None, None, None)
+                        except Exception:
+                            pass
+
                     if attempt < self.max_retries - 1:
                         await asyncio.sleep(1)  # Wait before retry
 

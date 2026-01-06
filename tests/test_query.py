@@ -5,12 +5,7 @@ Tests for Fluent API query builder and result handling.
 """
 
 import pytest
-import sys
-from pathlib import Path
 from datetime import datetime, timedelta
-
-# Add src to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from kdm_sdk.query import KDMQuery
 from kdm_sdk.results import QueryResult, BatchResult
@@ -108,9 +103,11 @@ async def test_year_over_year_comparison():
 
     query = KDMQuery(client=client)
 
+    # compare_with_previous_year() requires date_range()
     result = (
         await query.site("장흥댐", facility_type="dam")
         .measurements(["저수율"])
+        .date_range("2024-01-01", "2024-01-07")  # Required for comparison
         .compare_with_previous_year()
         .execute()
     )
@@ -457,3 +454,22 @@ async def test_query_clone():
     # Original should be unchanged
     assert query1._site_name == "소양강댐"
     assert query2._site_name == "충주댐"
+
+
+@pytest.mark.asyncio
+async def test_comparison_without_date_range_raises_error():
+    """compare_with_previous_year() without date_range() raises ValueError"""
+    client = KDMClient()
+    await client.connect()
+
+    query = KDMQuery(client=client)
+
+    # Using days() instead of date_range() should raise ValueError
+    with pytest.raises(ValueError, match="Comparison mode requires date_range"):
+        await (
+            query.site("소양강댐", facility_type="dam")
+            .measurements(["저수율"])
+            .days(7)  # Using days() instead of date_range()
+            .compare_with_previous_year()
+            .execute()
+        )

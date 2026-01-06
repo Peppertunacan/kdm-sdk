@@ -350,6 +350,9 @@ class KDMQuery:
 
             return result
 
+        except ValueError:
+            # Re-raise validation errors (e.g., comparison mode requires date_range)
+            raise
         except Exception as e:
             logger.error(f"[KDMQuery] Query failed: {e}")
 
@@ -406,11 +409,14 @@ class KDMQuery:
                 }
 
             else:
-                logger.warning(
-                    "[KDMQuery] Comparison mode requires start_date and end_date"
+                raise ValueError(
+                    "Comparison mode requires date_range(start, end). "
+                    "Use .date_range('2024-01-01', '2024-01-31').compare_with_previous_year()"
                 )
-                return None
 
+        except ValueError:
+            # Re-raise ValueError for explicit validation errors
+            raise
         except Exception as e:
             logger.error(f"[KDMQuery] Failed to fetch comparison data: {e}")
             return None

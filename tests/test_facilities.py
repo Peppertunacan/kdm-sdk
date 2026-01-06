@@ -56,6 +56,32 @@ class TestFacilityPairInitialization:
         with pytest.raises(ValueError, match="downstream_name.*required"):
             FacilityPair(upstream_name="소양강댐")
 
+    def test_init_validation_requires_datetime_index(self):
+        """Should raise ValueError if DataFrame doesn't have DatetimeIndex"""
+        # DataFrame with RangeIndex (default)
+        upstream_df = pd.DataFrame({"방류량": [1, 2, 3]})
+        downstream_df = pd.DataFrame({"수위": [1, 2, 3]})
+
+        # upstream_data without DatetimeIndex should raise
+        with pytest.raises(ValueError, match="upstream_data must have DatetimeIndex"):
+            FacilityPair(
+                upstream_name="소양강댐",
+                downstream_name="춘천",
+                upstream_data=upstream_df,
+            )
+
+        # downstream_data without DatetimeIndex should raise
+        dates = pd.date_range("2024-01-01", periods=3, freq="h")
+        valid_upstream_df = pd.DataFrame({"방류량": [1, 2, 3]}, index=dates)
+
+        with pytest.raises(ValueError, match="downstream_data must have DatetimeIndex"):
+            FacilityPair(
+                upstream_name="소양강댐",
+                downstream_name="춘천",
+                upstream_data=valid_upstream_df,
+                downstream_data=downstream_df,
+            )
+
 
 class TestLagAlignment:
     """Test time series alignment with lag"""

@@ -98,6 +98,7 @@ class FacilityPair:
         downstream_type: Optional[str] = None,
         upstream_data: Optional[pd.DataFrame] = None,
         downstream_data: Optional[pd.DataFrame] = None,
+        lag_hours: Optional[float] = None,
     ):
         """
         Initialize FacilityPair
@@ -109,6 +110,7 @@ class FacilityPair:
             downstream_type: Type of downstream facility
             upstream_data: DataFrame with upstream measurements (datetime index)
             downstream_data: DataFrame with downstream measurements (datetime index)
+            lag_hours: Default time lag in hours for alignment (optional)
 
         Raises:
             ValueError: If required parameters are missing
@@ -124,20 +126,23 @@ class FacilityPair:
         self.downstream_type = downstream_type
         self.upstream_data = upstream_data
         self.downstream_data = downstream_data
+        self.lag_hours = lag_hours
 
-        # Validate DataFrames if provided
+        # Validate DataFrames if provided - require DatetimeIndex
         if upstream_data is not None and not isinstance(
             upstream_data.index, pd.DatetimeIndex
         ):
-            logger.warning(
-                f"upstream_data for {upstream_name} does not have DatetimeIndex"
+            raise ValueError(
+                f"upstream_data must have DatetimeIndex, "
+                f"got {type(upstream_data.index).__name__}"
             )
 
         if downstream_data is not None and not isinstance(
             downstream_data.index, pd.DatetimeIndex
         ):
-            logger.warning(
-                f"downstream_data for {downstream_name} does not have DatetimeIndex"
+            raise ValueError(
+                f"downstream_data must have DatetimeIndex, "
+                f"got {type(downstream_data.index).__name__}"
             )
 
     def align_with_lag(
@@ -395,7 +400,7 @@ class FacilityPair:
 
     def to_dataframe(
         self,
-        lag_hours: float = 0,
+        lag_hours: Optional[float] = None,
         upstream_column: Optional[str] = None,
         downstream_column: Optional[str] = None,
         include_raw: bool = False,
@@ -404,7 +409,7 @@ class FacilityPair:
         Export aligned data to DataFrame for analysis
 
         Args:
-            lag_hours: Time lag to apply
+            lag_hours: Time lag to apply (uses self.lag_hours if not specified)
             upstream_column: Column name from upstream data
             downstream_column: Column name from downstream data
             include_raw: If True, include non-aligned raw data as well
@@ -418,9 +423,12 @@ class FacilityPair:
             >>> # Use for visualization or further analysis
             >>> df.plot(title='Dam Release vs Downstream Water Level')
         """
+        # Use self.lag_hours as default if lag_hours not specified
+        effective_lag = lag_hours if lag_hours is not None else (self.lag_hours or 0)
+
         # Get aligned data
         aligned = self.align_with_lag(
-            lag_hours=lag_hours,
+            lag_hours=effective_lag,
             upstream_column=upstream_column,
             downstream_column=downstream_column,
             dropna=True,

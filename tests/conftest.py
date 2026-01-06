@@ -7,6 +7,13 @@ pytest 공통 설정 및 픽스처
 import pytest
 from typing import List, Dict, Any
 
+# Pre-import kdm_sdk modules to ensure consistent module identity
+# This prevents isinstance issues when tests import from different paths
+import kdm_sdk
+from kdm_sdk import KDMClient, KDMQuery, FacilityPair
+from kdm_sdk.results import QueryResult, BatchResult
+from kdm_sdk.templates import Template, TemplateBuilder, load_yaml, load_python
+
 
 @pytest.fixture
 async def kdm_client():

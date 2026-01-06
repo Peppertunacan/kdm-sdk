@@ -172,6 +172,41 @@ class TemplateBuilder:
             )
         return self
 
+    def add_pair(
+        self,
+        upstream_name: Optional[str] = None,
+        downstream_name: Optional[str] = None,
+        upstream_type: str = "dam",
+        downstream_type: str = "water_level",
+        upstream_measurements: Optional[List[str]] = None,
+        downstream_measurements: Optional[List[str]] = None,
+        lag_hours: Optional[float] = None,
+    ) -> "TemplateBuilder":
+        """
+        Alias for pair() with alternative keyword argument names.
+
+        Args:
+            upstream_name: Upstream facility name (e.g., "소양강댐")
+            downstream_name: Downstream facility name (e.g., "의암댐")
+            upstream_type: Upstream facility type (default: "dam")
+            downstream_type: Downstream facility type (default: "water_level")
+            upstream_measurements: Measurement items for upstream
+            downstream_measurements: Measurement items for downstream
+            lag_hours: Time lag in hours
+
+        Returns:
+            Self for chaining
+        """
+        return self.pair(
+            upstream=upstream_name,
+            downstream=downstream_name,
+            upstream_type=upstream_type,
+            downstream_type=downstream_type,
+            upstream_items=upstream_measurements,
+            downstream_items=downstream_measurements,
+            lag_hours=lag_hours,
+        )
+
     def measurements(self, items: List[str]) -> "TemplateBuilder":
         """
         Set measurement items.

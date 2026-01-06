@@ -5,6 +5,7 @@ Executable template with parameter support.
 """
 
 from typing import Dict, Any, Optional
+import pandas as pd
 from ..query import KDMQuery
 from ..facilities import FacilityPair
 from ..client import KDMClient
@@ -73,9 +74,6 @@ class Template:
         Returns:
             FacilityPair with fetched data
         """
-        from ..query import KDMQuery
-        from ..results import QueryResult
-
         pair_config = config["pairs"][0]
         period = config.get("period", {})
         time_key = config.get("time_key", "h_1")
@@ -98,6 +96,11 @@ class Template:
         upstream_result = await upstream_query.execute()
         upstream_df = upstream_result.to_dataframe()
 
+        # Convert to DatetimeIndex if datetime column exists
+        if "datetime" in upstream_df.columns:
+            upstream_df["datetime"] = pd.to_datetime(upstream_df["datetime"])
+            upstream_df.set_index("datetime", inplace=True)
+
         # Fetch downstream data
         downstream_query = KDMQuery(client=client)
         downstream_query.site(
@@ -116,6 +119,11 @@ class Template:
         downstream_result = await downstream_query.execute()
         downstream_df = downstream_result.to_dataframe()
 
+        # Convert to DatetimeIndex if datetime column exists
+        if "datetime" in downstream_df.columns:
+            downstream_df["datetime"] = pd.to_datetime(downstream_df["datetime"])
+            downstream_df.set_index("datetime", inplace=True)
+
         # Create FacilityPair with data
         pair = FacilityPair(
             upstream_name=pair_config["upstream"],
@@ -124,6 +132,7 @@ class Template:
             downstream_type=pair_config.get("downstream_type", "water_level"),
             upstream_data=upstream_df,
             downstream_data=downstream_df,
+            lag_hours=pair_config.get("lag_hours"),
         )
 
         return pair
@@ -217,6 +226,18 @@ class Template:
         from .loaders import save_yaml
 
         save_yaml(self, filepath)
+
+    def save(self, filepath: str):
+        """
+        Alias for save_yaml().
+
+        Args:
+            filepath: Path to YAML file
+
+        Example:
+            >>> template.save("my_template.yaml")
+        """
+        return self.save_yaml(filepath)
 
     def __repr__(self) -> str:
         """String representation"""

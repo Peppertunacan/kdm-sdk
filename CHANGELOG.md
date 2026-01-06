@@ -5,6 +5,49 @@ All notable changes to KDM SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.3] - 2026-01-06
+
+### Added
+
+- **Template API 개선**
+  - `Template.save()`: `save_yaml()` alias 추가
+  - `TemplateBuilder.add_pair()`: `pair()` alias 추가 (더 직관적인 파라미터명 사용)
+
+- **FacilityPair lag_hours 지원**
+  - `FacilityPair.__init__(lag_hours=...)`: 기본 시간 지연값 저장
+  - `to_dataframe()`: `lag_hours` 미지정 시 저장된 값 자동 사용
+  - `_execute_pair()`: 템플릿에서 `lag_hours` 자동 전달
+
+### Changed
+
+- **comparison_data 명시적 에러 처리**
+  - `compare_with_previous_year()`는 이제 `date_range()` 필수
+  - `days()` 사용 시 `ValueError` 발생 (이전: 경고만 출력)
+  - 에러 메시지에 올바른 사용법 안내 포함
+
+- **DatetimeIndex 검증 강화**
+  - `FacilityPair` 생성 시 DataFrame에 `DatetimeIndex` 필수
+  - 잘못된 인덱스 타입 전달 시 `ValueError` 발생 (이전: 경고만 출력)
+
+### Fixed
+
+- **연결 실패 시 리소스 정리 개선**
+  - `connect()` 실패 시 `sse_context`와 `session` 리소스 정리
+  - 로컬 변수 사용으로 실패 시 인스턴스 변수 오염 방지
+
+- **테스트 코드 정리**
+  - 모든 테스트 파일에서 `sys.path` 조작 완전 제거
+  - editable install (`pip install -e .`) 사용 권장
+  - `isinstance` 문제 해결
+
+### Testing
+
+- 새 테스트 추가 (128 → 131개)
+  - `test_save_alias`: `save()` 메서드 테스트
+  - `test_comparison_without_date_range_raises_error`: ValueError 테스트
+  - `test_init_validation_requires_datetime_index`: DatetimeIndex 검증 테스트
+- `test_template_with_facility_pair` skip 해제 (add_pair 구현 완료)
+
 ## [0.2.2] - 2026-01-02
 
 ### Improved

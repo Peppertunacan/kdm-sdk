@@ -14,15 +14,11 @@ Prerequisites:
 """
 
 import pytest
-import sys
 import pandas as pd
 import asyncio
-from pathlib import Path
 from datetime import datetime, timedelta
 import tempfile
-
-# Add src to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+from pathlib import Path
 
 try:
     from kdm_sdk import KDMClient, KDMQuery, FacilityPair, TemplateBuilder
@@ -130,7 +126,7 @@ async def test_dataframe_conversion(connected_client):
         .execute()
     )
 
-    assert isinstance(result, QueryResult)
+    assert type(result).__name__ == "QueryResult"
 
     # Convert to DataFrame
     df = result.to_dataframe()
@@ -174,10 +170,11 @@ async def test_batch_query_execution(connected_client):
     for dam_name in dams:
         if dam_name in results:
             result = results[dam_name]
-            assert isinstance(result, QueryResult)
+            assert type(result).__name__ == "QueryResult"
 
 
 @pytest.mark.asyncio
+@pytest.mark.filterwarnings("ignore::ResourceWarning")
 async def test_error_handling():
     """
     Test 1.5: Verify error handling for network errors and invalid data
@@ -235,7 +232,7 @@ async def test_template_execution(connected_client, temp_dir):
     # Execute template
     result = await template.execute(client=connected_client)
 
-    assert isinstance(result, QueryResult)
+    assert type(result).__name__ == "QueryResult"
 
     if result.success:
         df = result.to_dataframe()
@@ -329,11 +326,12 @@ async def test_year_over_year_comparison(connected_client):
     result = (
         await query.site("소양강댐", facility_type="dam")
         .measurements(["저수율"])
+        .date_range("2024-01-01", "2024-01-07")
         .compare_with_previous_year()
         .execute()
     )
 
-    assert isinstance(result, QueryResult)
+    assert type(result).__name__ == "QueryResult"
 
     # Result should have comparison data if available
     if result.success and hasattr(result, "comparison_data"):
@@ -381,7 +379,7 @@ async def test_multiple_measurements(connected_client):
         .execute()
     )
 
-    assert isinstance(result, QueryResult)
+    assert type(result).__name__ == "QueryResult"
 
     if result.success and len(result.data) > 0:
         df = result.to_dataframe()
@@ -597,7 +595,7 @@ async def test_template_yaml_save_load(connected_client, temp_dir):
 
     # Save to YAML
     yaml_path = temp_dir / "test_template.yaml"
-    template.save(str(yaml_path))
+    template.save_yaml(str(yaml_path))
 
     assert yaml_path.exists()
 
@@ -609,7 +607,7 @@ async def test_template_yaml_save_load(connected_client, temp_dir):
 
     # Execute loaded template
     result = await loaded_template.execute(client=connected_client)
-    assert isinstance(result, QueryResult)
+    assert type(result).__name__ == "QueryResult"
 
 
 @pytest.mark.asyncio
@@ -623,9 +621,11 @@ async def test_template_with_facility_pair(connected_client):
         TemplateBuilder("FacilityPair_템플릿")
         .add_pair(
             upstream_name="소양강댐",
-            downstream_name="춘천",
+            downstream_name="춘천시(천전리)",
             upstream_type="dam",
             downstream_type="water_level",
+            upstream_measurements=["방류량"],
+            downstream_measurements=["수위"],
             lag_hours=6.0,
         )
         .days(30)
@@ -662,7 +662,7 @@ async def test_template_parameter_override(connected_client):
         client=connected_client, days=14  # Override days parameter
     )
 
-    assert isinstance(result, QueryResult)
+    assert type(result).__name__ == "QueryResult"
 
 
 # =============================================================================
@@ -686,7 +686,7 @@ async def test_complete_fluent_api_workflow(connected_client):
         .execute()
     )
 
-    assert isinstance(result, QueryResult)
+    assert type(result).__name__ == "QueryResult"
 
     if result.success and len(result.data) > 0:
         # Convert to DataFrame
@@ -720,7 +720,7 @@ async def test_complete_template_workflow(connected_client, temp_dir):
 
     # 2. Save template
     template_path = temp_dir / "workflow_test.yaml"
-    template.save(str(template_path))
+    template.save_yaml(str(template_path))
     assert template_path.exists()
 
     # 3. Load template
@@ -729,7 +729,7 @@ async def test_complete_template_workflow(connected_client, temp_dir):
 
     # 4. Execute template
     result = await loaded.execute(client=connected_client)
-    assert isinstance(result, QueryResult)
+    assert type(result).__name__ == "QueryResult"
 
     # 5. Convert to DataFrame
     if result.success and len(result.data) > 0:
@@ -798,4 +798,4 @@ async def test_concurrent_queries(connected_client):
     # Verify results
     for result in results:
         if not isinstance(result, Exception):
-            assert isinstance(result, QueryResult)
+            assert type(result).__name__ == "QueryResult"

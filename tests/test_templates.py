@@ -200,6 +200,30 @@ class TestYAMLLoader:
                 data = yaml.safe_load(f)
             assert data["name"] == "YAML Test"
 
+    def test_save_alias(self):
+        """Test save() alias for save_yaml()"""
+        from kdm_sdk.templates import TemplateBuilder
+
+        template = (
+            TemplateBuilder("Save Alias Test")
+            .site("소양강댐", facility_type="dam")
+            .measurements(["저수율"])
+            .days(7)
+            .build()
+        )
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            filepath = os.path.join(tmpdir, "save_alias_test.yaml")
+            template.save(filepath)  # Using save() alias
+
+            assert os.path.exists(filepath)
+            # Verify it's valid YAML
+            import yaml
+
+            with open(filepath, "r", encoding="utf-8") as f:
+                data = yaml.safe_load(f)
+            assert data["name"] == "Save Alias Test"
+
     def test_load_yaml(self):
         """Test loading template from YAML"""
         from kdm_sdk.templates import TemplateBuilder, load_yaml
