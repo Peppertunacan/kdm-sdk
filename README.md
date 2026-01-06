@@ -96,19 +96,22 @@ result = await KDMQuery().site("소양강댐").measurements(["저수율"]) \
 
 ```python
 import asyncio
-from kdm_sdk import KDMQuery
+from kdm_sdk import KDMQuery, KDMClient
 
 async def main():
     # 댐 저수율 데이터 조회
-    result = await KDMQuery() \
-        .site("소양강댐", facility_type="dam") \
-        .measurements(["저수율", "유입량"]) \
-        .days(7) \
-        .execute()
+    async with KDMClient() as client:
+        result = (
+            await KDMQuery(client=client)
+            .site("소양강댐", facility_type="dam")
+            .measurements(["저수율", "유입량"])
+            .days(7)
+            .execute()
+        )
 
-    # pandas DataFrame으로 변환
-    df = result.to_dataframe()
-    print(df.head())
+        # pandas DataFrame으로 변환
+        df = result.to_dataframe()
+        print(df.head())
 
 asyncio.run(main())
 ```
@@ -119,21 +122,19 @@ asyncio.run(main())
 from kdm_sdk import KDMQuery
 
 async def batch_query():
-    query = KDMQuery()
+    async with KDMClient() as client:
+        query = KDMQuery(client=client)
 
-    # 여러 댐 추가
-    for dam in ["소양강댐", "충주댐", "팔당댐"]:
-        query.site(dam, facility_type="dam") \
-             .measurements(["저수율"]) \
-             .days(7) \
-             .add()
+        # 여러 댐 추가
+        for dam in ["소양강댐", "충주댐", "팔당댐"]:
+            query.site(dam, facility_type="dam").measurements(["저수율"]).days(7).add()
 
-    # 병렬 실행
-    results = await query.execute_batch(parallel=True)
+        # 병렬 실행
+        results = await query.execute_batch(parallel=True)
 
-    # 단일 DataFrame으로 통합
-    combined_df = results.aggregate()
-    print(combined_df.groupby("site_name")["저수율"].mean())
+        # 단일 DataFrame으로 통합
+        combined_df = results.aggregate()
+        print(combined_df.groupby("site_name")["저수율"].mean())
 
 asyncio.run(batch_query())
 ```
@@ -211,15 +212,18 @@ from kdm_sdk.templates import TemplateBuilder
 
 async def template_query():
     # 재사용 가능한 템플릿 생성
-    template = TemplateBuilder("주간 댐 모니터링") \
-        .site("소양강댐", facility_type="dam") \
-        .measurements(["저수율", "유입량", "방류량"]) \
-        .days(7) \
-        .time_key("h_1") \
+    template = (
+        TemplateBuilder("주간 댐 모니터링")
+        .site("소양강댐", facility_type="dam")
+        .measurements(["저수율", "유입량", "방류량"])
+        .days(7)
+        .time_key("h_1")
         .build()
+    )
 
     # 템플릿 실행
-    result = await template.execute()
+    async with KDMClient() as client:
+        result = await template.execute(client=client)
     df = result.to_dataframe()
 
     # 템플릿 저장하여 재사용
@@ -236,7 +240,8 @@ from kdm_sdk.templates import TemplateBuilder
 
 async def pair_template():
     # add_pair()로 상류-하류 페어 템플릿 생성
-    template = TemplateBuilder("소양강댐 하류 영향 분석") \
+    template = (
+        TemplateBuilder("소양강댐 하류 영향 분석")
         .add_pair(
             upstream_name="소양강댐",
             downstream_name="춘천시(천전리)",
@@ -244,13 +249,15 @@ async def pair_template():
             downstream_type="water_level",
             upstream_measurements=["방류량"],
             downstream_measurements=["수위"],
-            lag_hours=6.0  # 시간 지연값
-        ) \
-        .days(30) \
+            lag_hours=6.0,  # 시간 지연값
+        )
+        .days(30)
         .build()
+    )
 
     # 실행 - FacilityPair 반환
-    pair = await template.execute()
+    async with KDMClient() as client:
+        pair = await template.execute(client=client)
 
     # to_dataframe()에서 lag_hours 자동 적용
     df = pair.to_dataframe()
@@ -430,23 +437,28 @@ pytest -m integration
 ### 1. 여러 댐 모니터링
 
 ```python
-query = KDMQuery()
-for dam in ["소양강댐", "충주댐", "팔당댐", "대청댐"]:
-    query.site(dam).measurements(["저수율"]).days(30).add()
+async with KDMClient() as client:
+    query = KDMQuery(client=client)
+    for dam in ["소양강댐", "충주댐", "팔당댐", "대청댐"]:
+        query.site(dam).measurements(["저수율"]).days(30).add()
 
-results = await query.execute_batch(parallel=True)
-df = results.aggregate()
+    results = await query.execute_batch(parallel=True)
+    df = results.aggregate()
+    print(df.head())
 ```
 
 ### 2. 전년 대비 비교
 
 ```python
-result = await KDMQuery() \
-    .site("장흥댐") \
-    .measurements(["저수율"]) \
-    .date_range("2024-06-01", "2024-06-30") \
-    .compare_with_previous_year() \
-    .execute()
+async with KDMClient() as client:
+    result = (
+        await KDMQuery(client=client)
+        .site("장흥댐")
+        .measurements(["저수율"])
+        .date_range("2024-06-01", "2024-06-30")
+        .compare_with_previous_year()
+        .execute()
+    )
 ```
 
 ### 3. 하류 수위 예측
@@ -504,8 +516,8 @@ async with KDMClient() as client:
     df = pair.to_dataframe(lag_hours=5.5)
 
     # 머신러닝 모델 학습에 사용
-    X = df[["소양강댐_방류량"]]
-    y = df["의암댐_수위"]
+    X = df[["소양강댐_총방류량"]]
+    y = df["의암댐_저수위"]
 ```
 
 ## 개발
