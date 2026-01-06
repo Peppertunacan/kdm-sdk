@@ -442,7 +442,9 @@ class KDMClient:
 
         return await self._call_tool("list_measurements", args)
 
-    def _calculate_distance(self, loc1: Dict[str, float], loc2: Dict[str, float]) -> float:
+    def _calculate_distance(
+        self, loc1: Dict[str, float], loc2: Dict[str, float]
+    ) -> float:
         """
         Calculate distance between two geographic points using Haversine formula
 
@@ -461,12 +463,17 @@ class KDMClient:
         dlat = lat2 - lat1
         dlon = lon2 - lon1
 
-        a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
-        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+        a = (
+            math.sin(dlat / 2) ** 2
+            + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
+        )
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
         return R * c
 
-    def _is_downstream(self, dam_location: Dict[str, float], station_location: Dict[str, float]) -> bool:
+    def _is_downstream(
+        self, dam_location: Dict[str, float], station_location: Dict[str, float]
+    ) -> bool:
         """
         Determine if a station is downstream of a dam
 
@@ -483,10 +490,7 @@ class KDMClient:
         return station_location["lat"] < dam_location["lat"]
 
     def _match_by_basin(
-        self,
-        dam_basin: str,
-        direction: str,
-        all_facilities: List[Dict[str, Any]]
+        self, dam_basin: str, direction: str, all_facilities: List[Dict[str, Any]]
     ) -> List[Dict[str, Any]]:
         """
         Match stations by basin name
@@ -530,7 +534,7 @@ class KDMClient:
         dam_location: Dict[str, float],
         direction: str,
         all_facilities: List[Dict[str, Any]],
-        max_distance_km: float
+        max_distance_km: float,
     ) -> List[Dict[str, Any]]:
         """
         Search for stations using geographic distance and direction
@@ -587,7 +591,7 @@ class KDMClient:
         dam_name: str = None,
         dam_id: int = None,
         direction: str = "downstream",
-        limit: int = 10
+        limit: int = 10,
     ) -> Dict[str, Any]:
         """
         Find related stations using water flow network (new MCP tools).
@@ -617,7 +621,9 @@ class KDMClient:
         if dam_id:
             args["dam_id"] = dam_id
 
-        logger.debug(f"[_find_related_stations_via_network] Calling {tool_name} with {args}")
+        logger.debug(
+            f"[_find_related_stations_via_network] Calling {tool_name} with {args}"
+        )
 
         # Call the MCP tool
         result = await self._call_tool(tool_name, args)
@@ -628,6 +634,7 @@ class KDMClient:
         # Parse result - handle both string and dict responses
         if isinstance(result, str):
             import json
+
             try:
                 result = json.loads(result)
             except json.JSONDecodeError:
@@ -636,22 +643,26 @@ class KDMClient:
 
         # Check for success
         if not result.get("success", True):
-            logger.warning(f"{tool_name} returned error: {result.get('message', 'Unknown error')}")
+            logger.warning(
+                f"{tool_name} returned error: {result.get('message', 'Unknown error')}"
+            )
             return None
 
         # Transform response to match expected format
         stations = []
         for station in result.get("stations", []):
-            stations.append({
-                "site_id": station.get("site_id"),
-                "site_name": station.get("site_name"),
-                "facility_type": station.get("facility_type", "water_level"),
-                "match_type": "network",  # Indicate this came from water flow network
-                "confidence": station.get("confidence", "high"),
-                "original_facility_code": station.get("original_facility_code"),
-                "location": station.get("location"),
-                "basin": station.get("basin"),
-            })
+            stations.append(
+                {
+                    "site_id": station.get("site_id"),
+                    "site_name": station.get("site_name"),
+                    "facility_type": station.get("facility_type", "water_level"),
+                    "match_type": "network",  # Indicate this came from water flow network
+                    "confidence": station.get("confidence", "high"),
+                    "original_facility_code": station.get("original_facility_code"),
+                    "location": station.get("location"),
+                    "basin": station.get("basin"),
+                }
+            )
 
         # Build dam info from response
         dam_info = {
@@ -663,7 +674,7 @@ class KDMClient:
             "dam": dam_info,
             "stations": stations[:limit],
             "source": "water_flow_network",
-            "message": result.get("message", "")
+            "message": result.get("message", ""),
         }
 
     async def find_related_stations(
@@ -673,7 +684,7 @@ class KDMClient:
         direction: str = "downstream",
         station_type: str = "water_level",
         max_distance_km: float = 100.0,
-        limit: int = 10
+        limit: int = 10,
     ) -> Dict[str, Any]:
         """
         Find upstream or downstream monitoring stations related to a dam
@@ -742,10 +753,7 @@ class KDMClient:
         # Try new MCP tools first (water flow network based)
         try:
             result = await self._find_related_stations_via_network(
-                dam_name=dam_name,
-                dam_id=dam_id,
-                direction=direction,
-                limit=limit
+                dam_name=dam_name, dam_id=dam_id, direction=direction, limit=limit
             )
             if result and result.get("stations"):
                 logger.info(
@@ -763,19 +771,17 @@ class KDMClient:
         if dam_id:
             # Search by site_id - search all dams and filter by site_id
             dam_results = await self.search_facilities(
-                query="",
-                facility_type="dam",
-                limit=1000
+                query="", facility_type="dam", limit=1000
             )
-            dam_results = [r for r in dam_results if r.get("site", r).get("site_id") == dam_id]
+            dam_results = [
+                r for r in dam_results if r.get("site", r).get("site_id") == dam_id
+            ]
             if not dam_results:
                 raise ValueError(f"Dam with site_id={dam_id} not found in catalog")
         else:
             # Search by name
             dam_results = await self.search_facilities(
-                query=dam_name,
-                facility_type="dam",
-                limit=5
+                query=dam_name, facility_type="dam", limit=5
             )
             if not dam_results:
                 raise ValueError(f"Dam '{dam_name}' not found in catalog")
@@ -787,9 +793,7 @@ class KDMClient:
         dam_location = dam_info.get("location")
         dam_name_for_search = dam_info.get("site_name", dam_name or f"site_{dam_id}")
 
-        logger.debug(
-            f"Dam info: basin={dam_basin}, location={dam_location}"
-        )
+        logger.debug(f"Dam info: basin={dam_basin}, location={dam_location}")
 
         # Step 3 & 4: Try basin matching first
         stations = []
@@ -801,19 +805,13 @@ class KDMClient:
             search_query = base_basin.replace("댐", "")  # e.g., "소양강댐" → "소양강"
 
             all_stations = await self.search_facilities(
-                query=search_query,
-                facility_type=station_type,
-                limit=100
+                query=search_query, facility_type=station_type, limit=100
             )
 
-            basin_matches = self._match_by_basin(
-                dam_basin, direction, all_stations
-            )
+            basin_matches = self._match_by_basin(dam_basin, direction, all_stations)
 
             if basin_matches:
-                logger.info(
-                    f"Basin matching: found {len(basin_matches)} stations"
-                )
+                logger.info(f"Basin matching: found {len(basin_matches)} stations")
                 stations = basin_matches
 
         # Step 5: Geographic fallback if basin matching failed
@@ -821,11 +819,11 @@ class KDMClient:
             logger.info("Basin matching failed, using geographic search")
 
             # Search for nearby stations (use dam name prefix)
-            search_prefix = dam_name_for_search.replace("댐", "")[:2]  # Get first 2 chars
+            search_prefix = dam_name_for_search.replace("댐", "")[
+                :2
+            ]  # Get first 2 chars
             nearby_stations = await self.search_facilities(
-                query=search_prefix,
-                facility_type=station_type,
-                limit=100
+                query=search_prefix, facility_type=station_type, limit=100
             )
 
             stations = self._geographic_search(
@@ -839,9 +837,7 @@ class KDMClient:
 
         # Step 6: Handle no results
         if not stations:
-            logger.warning(
-                f"No {direction} stations found for {dam_name_for_search}"
-            )
+            logger.warning(f"No {direction} stations found for {dam_name_for_search}")
             if not dam_location:
                 logger.warning(
                     f"Dam location data not available, "
@@ -849,10 +845,7 @@ class KDMClient:
                 )
 
         # Step 7: Return with dam info and stations
-        return {
-            "dam": dam_info,
-            "stations": stations[:limit]
-        }
+        return {"dam": dam_info, "stations": stations[:limit]}
 
     async def health_check(self) -> bool:
         """

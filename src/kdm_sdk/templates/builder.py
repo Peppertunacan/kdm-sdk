@@ -132,9 +132,7 @@ class TemplateBuilder:
             # Use FacilityPair instance (note: FacilityPair uses upstream_name/downstream_name)
             self._config["pairs"].append(
                 {
-                    "upstream": getattr(
-                        facility_pair, "upstream_name", upstream or ""
-                    ),
+                    "upstream": getattr(facility_pair, "upstream_name", upstream or ""),
                     "downstream": getattr(
                         facility_pair, "downstream_name", downstream or ""
                     ),

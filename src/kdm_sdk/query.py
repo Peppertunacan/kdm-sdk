@@ -463,8 +463,8 @@ class KDMQuery:
 
             # Wait for all tasks
             logger.info(f"[KDMQuery] Executing {len(tasks)} queries in parallel")
-            query_results: List[Union[QueryResult, BaseException]] = await asyncio.gather(
-                *tasks, return_exceptions=True
+            query_results: List[Union[QueryResult, BaseException]] = (
+                await asyncio.gather(*tasks, return_exceptions=True)
             )
 
             # Collect results

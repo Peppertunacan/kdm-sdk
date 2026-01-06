@@ -15,19 +15,19 @@ import sys
 def test_lazy_loading_mcp_not_imported():
     """Verify MCP not imported on module load"""
     # Remove kdm_sdk from sys.modules to get fresh import
-    modules_to_remove = [key for key in sys.modules if key.startswith('kdm_sdk')]
+    modules_to_remove = [key for key in sys.modules if key.startswith("kdm_sdk")]
     for mod in modules_to_remove:
         del sys.modules[mod]
 
     # Remove mcp if present
-    if 'mcp' in sys.modules:
-        del sys.modules['mcp']
+    if "mcp" in sys.modules:
+        del sys.modules["mcp"]
 
     # Import kdm_sdk
     import kdm_sdk
 
     # Verify mcp is NOT imported yet (lazy loading working)
-    assert 'mcp' not in sys.modules, "MCP should not be imported on module load"
+    assert "mcp" not in sys.modules, "MCP should not be imported on module load"
 
 
 def test_lazy_import_returns_correct_class():
@@ -36,18 +36,18 @@ def test_lazy_import_returns_correct_class():
 
     # Test that we can access the class
     assert kdm_sdk.KDMClient is not None
-    assert hasattr(kdm_sdk.KDMClient, '__init__')
-    assert hasattr(kdm_sdk.KDMClient, 'connect')
-    assert hasattr(kdm_sdk.KDMClient, 'disconnect')
+    assert hasattr(kdm_sdk.KDMClient, "__init__")
+    assert hasattr(kdm_sdk.KDMClient, "connect")
+    assert hasattr(kdm_sdk.KDMClient, "disconnect")
 
     # Test FacilityPair
     assert kdm_sdk.FacilityPair is not None
-    assert hasattr(kdm_sdk.FacilityPair, '__init__')
+    assert hasattr(kdm_sdk.FacilityPair, "__init__")
 
     # Test KDMQuery
     assert kdm_sdk.KDMQuery is not None
-    assert hasattr(kdm_sdk.KDMQuery, 'site')
-    assert hasattr(kdm_sdk.KDMQuery, 'execute')
+    assert hasattr(kdm_sdk.KDMQuery, "site")
+    assert hasattr(kdm_sdk.KDMQuery, "execute")
 
 
 def test_lazy_import_idempotent():
@@ -105,6 +105,6 @@ def test_version_accessible():
     """Verify __version__ is accessible"""
     import kdm_sdk
 
-    assert hasattr(kdm_sdk, '__version__')
+    assert hasattr(kdm_sdk, "__version__")
     assert isinstance(kdm_sdk.__version__, str)
     assert len(kdm_sdk.__version__) > 0

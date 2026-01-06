@@ -4,9 +4,11 @@ Debug test for find_related_stations
 """
 import asyncio
 import sys
-sys.path.insert(0, '/home/claudeuser/kdm-sdk/src')
+
+sys.path.insert(0, "/home/claudeuser/kdm-sdk/src")
 
 from kdm_sdk.client import KDMClient
+
 
 async def debug_search():
     """Debug the search process"""
@@ -17,9 +19,7 @@ async def debug_search():
         # Step 1: Get dam info
         print("Step 1: Searching for 소양강댐...")
         dam_results = await client.search_facilities(
-            query="소양강댐",
-            facility_type="dam",
-            limit=3
+            query="소양강댐", facility_type="dam", limit=3
         )
 
         print(f"Found {len(dam_results)} dams:")
@@ -34,7 +34,7 @@ async def debug_search():
             return
 
         dam_info = dam_results[0]
-        dam_basin = dam_info.get('basin')
+        dam_basin = dam_info.get("basin")
         print(f"\n\nUsing basin: {dam_basin}")
 
         # Step 2: Search for related stations
@@ -43,11 +43,11 @@ async def debug_search():
             search_query = base_basin.replace("댐", "")
             print(f"Search query: '{search_query}'")
 
-            print(f"\nStep 2: Searching for water_level stations with query='{search_query}'...")
+            print(
+                f"\nStep 2: Searching for water_level stations with query='{search_query}'..."
+            )
             stations = await client.search_facilities(
-                query=search_query,
-                facility_type="water_level",
-                limit=20
+                query=search_query, facility_type="water_level", limit=20
             )
 
             print(f"\nFound {len(stations)} water_level stations:")
@@ -60,7 +60,7 @@ async def debug_search():
             print(f"\n\nStep 3: Checking basin matching...")
             print(f"Looking for basin matching: '{base_basin}하류'")
 
-            matches = [s for s in stations if s.get('basin') == f"{base_basin}하류"]
+            matches = [s for s in stations if s.get("basin") == f"{base_basin}하류"]
             print(f"Found {len(matches)} matches with basin='{base_basin}하류'")
 
             if matches:
@@ -71,10 +71,12 @@ async def debug_search():
     except Exception as e:
         print(f"Error: {e}")
         import traceback
+
         traceback.print_exc()
 
     finally:
         await client.disconnect()
+
 
 if __name__ == "__main__":
     asyncio.run(debug_search())

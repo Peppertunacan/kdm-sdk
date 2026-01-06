@@ -220,11 +220,18 @@ async def test_disconnect_logs_cleanup_errors_as_debug(monkeypatch, caplog):
         await client.disconnect()
 
     # Check that error was logged at DEBUG level (not WARNING)
-    debug_messages = [record.message for record in caplog.records if record.levelname == "DEBUG"]
-    assert any("Error during disconnect" in msg or "Mock cleanup error" in msg for msg in debug_messages)
+    debug_messages = [
+        record.message for record in caplog.records if record.levelname == "DEBUG"
+    ]
+    assert any(
+        "Error during disconnect" in msg or "Mock cleanup error" in msg
+        for msg in debug_messages
+    )
 
     # Verify no WARNING level logs for cleanup errors
-    warning_messages = [record.message for record in caplog.records if record.levelname == "WARNING"]
+    warning_messages = [
+        record.message for record in caplog.records if record.levelname == "WARNING"
+    ]
     assert not any("Error during disconnect" in msg for msg in warning_messages)
 
 

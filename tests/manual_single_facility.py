@@ -4,9 +4,11 @@ Test a single facility name
 """
 import asyncio
 import sys
-sys.path.insert(0, '/home/claudeuser/kdm-sdk/src')
+
+sys.path.insert(0, "/home/claudeuser/kdm-sdk/src")
 
 from kdm_sdk.client import KDMClient
+
 
 async def test_facility():
     client = KDMClient()
@@ -20,11 +22,11 @@ async def test_facility():
             facility_type="rainfall",
             measurement_items=["우량"],
             time_key="d_1",
-            days=3
+            days=3,
         )
 
-        if result and result.get('success'):
-            data_count = len(result.get('data', []))
+        if result and result.get("success"):
+            data_count = len(result.get("data", []))
             print(f"✅ 작동! ({data_count} data points)")
         else:
             print(f"❌ 실패")
@@ -33,6 +35,7 @@ async def test_facility():
         print(f"❌ 오류: {str(e)}")
 
     await client.disconnect()
+
 
 if __name__ == "__main__":
     asyncio.run(test_facility())

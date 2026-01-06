@@ -319,6 +319,7 @@ async def test_facility_pair_performance(connected_client):
 
     Benchmarks upstream-downstream data fetching and alignment
     """
+
     # Helper function to convert KDM data to DataFrame
     def convert_to_dataframe(data):
         records = []
@@ -343,7 +344,7 @@ async def test_facility_pair_performance(connected_client):
         facility_type="dam",
         measurement_items=["방류량"],
         days=30,
-        time_key="h_1"
+        time_key="h_1",
     )
 
     # Fetch downstream data (water level station)
@@ -352,7 +353,7 @@ async def test_facility_pair_performance(connected_client):
         facility_type="water_level",
         measurement_items=["수위"],
         days=30,
-        time_key="h_1"
+        time_key="h_1",
     )
 
     # Convert to DataFrames
@@ -370,7 +371,7 @@ async def test_facility_pair_performance(connected_client):
         upstream_type="dam",
         downstream_type="water_level",
         upstream_data=upstream_data,
-        downstream_data=downstream_data
+        downstream_data=downstream_data,
     )
 
     execution_time = time.time() - start_time
