@@ -400,7 +400,7 @@ def main():
     print("\nThis example suite demonstrates how to find related monitoring")
     print("stations for dams using the find_related_stations() method.")
     print("\nPrerequisites:")
-    print("  ✓ KDM MCP Server running on http://203.237.1.4:8080")
+    print("  ✓ KDM MCP Server running on http://203.237.1.4/mcp/sse")
     print("  ✓ Network connectivity to the server")
 
     print("\n" + "=" * 60)

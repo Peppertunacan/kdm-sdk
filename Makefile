@@ -62,7 +62,7 @@ test-unit: install-dev
 	$(VENV_PYTEST) -v -m unit
 
 test-integration: install-dev
-	@echo "경고: MCP 서버가 http://203.237.1.4:8080에서 실행 중이어야 합니다"
+	@echo "경고: MCP 서버가 http://203.237.1.4/mcp에서 실행 중이어야 합니다"
 	$(VENV_PYTEST) -v -m integration
 
 test-all: install-dev

@@ -5,6 +5,14 @@ All notable changes to KDM SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.4] - 2026-01-08
+
+### Changed
+
+- **MCP 서버 접속 URL 변경**
+  - 기본 접속 URL을 `http://203.237.1.4/mcp/sse`에서 `http://203.237.1.4/mcp/sse`로 변경 (보안 및 접근성 개선)
+  - `.env.example`, `docker-compose.yml`, README, 테스트 코드 및 예제 코드의 모든 URL 참조 업데이트
+
 ## [0.2.3] - 2026-01-06
 
 ### Added
@@ -153,7 +161,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     ```
 
 - **Server URL** - Migrated to production environment
-  - Default server: `http://203.237.1.4:8080/sse` (changed from `http://localhost:8001/sse`)
+  - Default server: `http://203.237.1.4/mcp/sse` (changed from `http://localhost:8001/sse`)
   - All examples and tests updated to use production server
   - Backward compatible with custom server URLs via `KDMClient(server_url="...")`
   - Environment-specific configuration still supported
@@ -217,7 +225,7 @@ client = KDMClient(server_url="http://localhost:8001/sse")  # Old
 # Update to
 client = KDMClient()  # Uses production server by default
 # Or explicitly specify
-client = KDMClient(server_url="http://203.237.1.4:8080/sse")  # New
+client = KDMClient(server_url="http://203.237.1.4/mcp/sse")  # New
 ```
 
 ---

@@ -62,7 +62,7 @@ pip install git+https://github.com/kwatermywater/kdm-sdk.git
 ## 요구사항
 
 - Python 3.10 이상
-- KDM MCP Server (운영 서버: `http://203.237.1.4:8080`)
+- KDM MCP Server (운영 서버: `http://203.237.1.4/mcp/sse`)
 - pandas 2.0+
 
 ## 처음 사용하시나요?

@@ -15,7 +15,7 @@ services:
       - ./pytest.ini:/app/pytest.ini
     command: pytest -v -m "not integration and not slow"
     environment:
-      - KDM_MCP_SERVER_URL=http://203.237.1.4:8080/sse
+      - KDM_MCP_SERVER_URL=http://203.237.1.4/mcp/sse
 
   # Python 3.11 test environment
   test-py311:
@@ -31,7 +31,7 @@ services:
       - ./pytest.ini:/app/pytest.ini
     command: pytest -v -m "not integration and not slow"
     environment:
-      - KDM_MCP_SERVER_URL=http://203.237.1.4:8080/sse
+      - KDM_MCP_SERVER_URL=http://203.237.1.4/mcp/sse
 
   # Python 3.12 test environment
   test-py312:
@@ -47,7 +47,7 @@ services:
       - ./pytest.ini:/app/pytest.ini
     command: pytest -v -m "not integration and not slow"
     environment:
-      - KDM_MCP_SERVER_URL=http://203.237.1.4:8080/sse
+      - KDM_MCP_SERVER_URL=http://203.237.1.4/mcp/sse
 
   # Development environment (Python 3.11 default)
   dev:
@@ -62,7 +62,7 @@ services:
     ports:
       - "8888:8888"  # Jupyter Notebook
     environment:
-      - KDM_MCP_SERVER_URL=http://203.237.1.4:8080/sse
+      - KDM_MCP_SERVER_URL=http://203.237.1.4/mcp/sse
     command: /bin/bash
     stdin_open: true
     tty: true
@@ -81,7 +81,7 @@ services:
       - ./pytest.ini:/app/pytest.ini
     command: pytest -v -m integration
     environment:
-      - KDM_MCP_SERVER_URL=http://203.237.1.4:8080/sse
+      - KDM_MCP_SERVER_URL=http://203.237.1.4/mcp/sse
     network_mode: host  # Allow access to production MCP server
 
   # Parallel test execution
@@ -98,7 +98,7 @@ services:
       - ./pytest.ini:/app/pytest.ini
     command: pytest -v -n auto -m "not integration"
     environment:
-      - KDM_MCP_SERVER_URL=http://203.237.1.4:8080/sse
+      - KDM_MCP_SERVER_URL=http://203.237.1.4/mcp/sse
 
   # Coverage measurement
   coverage:
@@ -115,4 +115,4 @@ services:
       - ./htmlcov:/app/htmlcov
     command: pytest --cov=kdm_sdk --cov-report=html --cov-report=term -m "not integration"
     environment:
-      - KDM_MCP_SERVER_URL=http://203.237.1.4:8080/sse
+      - KDM_MCP_SERVER_URL=http://203.237.1.4/mcp/sse

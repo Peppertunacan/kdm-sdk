@@ -13,7 +13,7 @@ Key Concepts:
 - Proper resource cleanup
 
 Prerequisites:
-- KDM MCP Server (Production: http://203.237.1.4:8080)
+- KDM MCP Server (Production: http://203.237.1.4/mcp/sse)
 - Python 3.10+
 - kdm-sdk installed (pip install -e .)
 
@@ -40,7 +40,7 @@ async def main():
     """
     # Initialize client
     # The server_url points to the KDM MCP Server's SSE endpoint
-    # Default is http://203.237.1.4:8080/sse (production server)
+    # Default is http://203.237.1.4/mcp/sse (production server)
     client = KDMClient()  # Uses default production server
 
     try:

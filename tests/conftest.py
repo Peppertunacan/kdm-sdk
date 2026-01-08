@@ -36,7 +36,7 @@ async def kdm_client():
     try:
         from kdm_sdk.client import KDMClient
 
-        client = KDMClient(server_url="http://203.237.1.4:8080/sse")
+        client = KDMClient(server_url="http://203.237.1.4/mcp/sse")
         await client.connect()
         yield client
         await client.disconnect()

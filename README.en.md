@@ -61,7 +61,7 @@ The `[analyst]` extra includes: pandas, jupyter, matplotlib, seaborn, plotly, op
 ## Requirements
 
 - Python 3.10 or higher
-- KDM MCP Server (Production: `http://203.237.1.4:8080`)
+- KDM MCP Server (Production: `http://203.237.1.4/mcp/sse`)
 - pandas 2.0+
 
 ## Quick Start

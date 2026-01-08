@@ -372,7 +372,7 @@ template = TemplateBuilder("Custom Batch") \
 1. **Start KDM MCP Server**:
 ```bash
 # Make sure server is running
-curl http://203.237.1.4:8080/health
+curl http://203.237.1.4/mcp/health
 ```
 
 2. **Install Dependencies**:
@@ -439,7 +439,7 @@ Some examples generate output files:
 **Solution**:
 ```bash
 # Check if server is running
-curl http://203.237.1.4:8080/health
+curl http://203.237.1.4/mcp/health
 
 # If not, start the server (refer to KDM MCP Server docs)
 ```

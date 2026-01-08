@@ -222,7 +222,7 @@ fi
 # 10. MCP 서버 연결 확인 (선택사항)
 info "MCP 서버 연결 확인 중..."
 
-MCP_SERVER_URL="${KDM_MCP_SERVER_URL:-http://203.237.1.4:8080}"
+MCP_SERVER_URL="${KDM_MCP_SERVER_URL:-http://203.237.1.4/mcp/sse}"
 if command -v curl &> /dev/null; then
     if curl -s --max-time 5 "$MCP_SERVER_URL" > /dev/null 2>&1; then
         check_pass "MCP Server reachable at $MCP_SERVER_URL"

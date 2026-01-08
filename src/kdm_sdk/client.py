@@ -38,7 +38,7 @@ class KDMClient:
 
     def __init__(
         self,
-        server_url: str = "http://203.237.1.4:8080/sse",
+        server_url: str = "http://203.237.1.4/mcp/sse",
         timeout: float = DEFAULT_TIMEOUT,
         max_retries: int = 3,
     ):

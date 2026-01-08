@@ -71,7 +71,7 @@ run_tests() {
             pytest -v -m "unit" || error "단위 테스트 실패"
             ;;
         integration)
-            warning "통합 테스트는 MCP 서버가 필요합니다 (http://203.237.1.4:8080)"
+            warning "통합 테스트는 MCP 서버가 필요합니다 (http://203.237.1.4/mcp/sse)"
             read -p "계속하시겠습니까? (y/n) " -n 1 -r
             echo
             if [[ $REPLY =~ ^[Yy]$ ]]; then
