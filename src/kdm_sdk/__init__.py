@@ -2,7 +2,7 @@
 KDM SDK - Python Client for KDM MCP Server
 """
 
-__version__ = "0.2.3"
+__version__ = "0.2.4"
 
 from typing import TYPE_CHECKING
 
